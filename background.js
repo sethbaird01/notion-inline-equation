@@ -1,6 +1,13 @@
 async function run(tabId) {
   if (!tabId) return;
-  chrome.tabs.sendMessage(tabId, { t: "RUN_CONVERT" });
+  try {
+    await chrome.tabs.sendMessage(tabId, { t: "RUN_CONVERT" });
+  } catch {
+    try {
+      await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
+      await chrome.tabs.sendMessage(tabId, { t: "RUN_CONVERT" });
+    } catch {}
+  }
 }
 
 chrome.commands.onCommand.addListener(async c => {
